@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class DNDCalculator : MonoBehaviour
+public class SolutionOne : MonoBehaviour
 {
     [Header("Character Sheet")]
     public string characterName;
@@ -119,18 +119,20 @@ public class DNDCalculator : MonoBehaviour
             // This loop adds 1 to loopNum after each run
             // This loop starts at 0
             // Class die type
-            //Roll die Averaged
+            // Roll die Averaged
             // Roll die Rolled
             if (dice == diceBehavior.Random)
             {
                 int roll = Random.Range(1,(selectedClass[playerClass])+1);
                 totalHP += roll;
+                Debug.Log(totalHP);
             }
             // This goes below the if dice random function
             //Roll die Averaged
             else
             {
                 totalHP += ((selectedClass[playerClass])+1)/2;
+                Debug.Log(totalHP);
             }
 
             
@@ -143,8 +145,8 @@ public class DNDCalculator : MonoBehaviour
 
     public void finalHP(int totalHP)
     {
-        totalHP = ((con/2)-5) + totalHP + (selectedRace[race]) + (selectedTrait[trait]);
-
+        totalHP = ((con/2)-5)*level + totalHP + (selectedRace[race])*level + (selectedTrait[trait])*level;
+        
         Debug.Log($"Welcome {characterName}! Your starting HP is : {totalHP}");
         return;
     }
