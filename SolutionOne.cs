@@ -6,9 +6,9 @@ public class SolutionOne : MonoBehaviour
 {
     [Header("Character Sheet")]
     public string characterName;
-    [Range(1,20)]
+    [Range(1,20)] // only allows values 1 to 20 inclusive for level
     public int level;
-    [Range(1,30)]
+    [Range(1,30)] // only allows values 1 to 30 inclusive for con
     public int con;
     
     // establishes a drop down selection for race selection in Inspector
@@ -26,6 +26,20 @@ public class SolutionOne : MonoBehaviour
         Tiefling
     }
     public races race;
+    // dictionary associates bonus hit points per level to player race
+    Dictionary<races, int> selectedRace = new Dictionary<races, int>()
+    {
+        {races.Aasimar, 0},
+        {races.Dragonborn, 0}, 
+        {races.Dwarf, 2},
+        {races.Elf, 0},
+        {races.Gnome, 0},
+        {races.Goliath, 1},
+        {races.Halfling, 0},
+        {races.Human, 0},
+        {races.Orc, 1},
+        {races.Tiefling, 0}
+    };
     
     // establishes a drop down selection for player class in Inspector
     public enum classes 
@@ -44,42 +58,6 @@ public class SolutionOne : MonoBehaviour
         Warlock
     }
     public classes playerClass;
-
-    // establishes a drop down selection for hit point traits in Inspector
-    public enum traitsHP 
-    {
-        None, 
-        Stout, 
-        Tough
-    }
-    public traitsHP trait;
-
-    // establishes a drop down selection for how dice are treated in Inspector
-    public enum diceBehavior {Averaged, Random};
-    public diceBehavior dice;
-
-    Dictionary<traitsHP, int> selectedTrait = new Dictionary<traitsHP, int>()
-    {
-        {traitsHP.None, 0},
-        {traitsHP.Stout, 1}, 
-        {traitsHP.Tough, 2}
-    };
-
-    // dictionary associates bonus hit points to player race
-     Dictionary<races, int> selectedRace = new Dictionary<races, int>()
-    {
-        {races.Aasimar, 0},
-        {races.Dragonborn, 0}, 
-        {races.Dwarf, 2},
-        {races.Elf, 0},
-        {races.Gnome, 0},
-        {races.Goliath, 1},
-        {races.Halfling, 0},
-        {races.Human, 0},
-        {races.Orc, 1},
-        {races.Tiefling, 0}
-    };
-    
     // dictionary associates hit dice to player class example: Artificer - D8
     Dictionary<classes, int> selectedClass = new Dictionary<classes, int>()
     {
@@ -98,57 +76,82 @@ public class SolutionOne : MonoBehaviour
        {classes.Warlock, 8}
     };
 
-    //level * dice + conBonus * level + feat * level + race * level
+    // establishes a drop down selection for hit point traits in Inspector
+    public enum traitsHP 
+    {
+        None, 
+        Stout, 
+        Tough
+    }
+    public traitsHP trait;
+    // dictionary associates HP gain per level to HP trait
+    Dictionary<traitsHP, int> selectedTrait = new Dictionary<traitsHP, int>()
+    {
+        {traitsHP.None, 0},
+        {traitsHP.Stout, 1}, 
+        {traitsHP.Tough, 2}
+    };
+
+    // establishes a drop down selection for how dice are treated in Inspector
+    public enum diceBehavior {Averaged, Random};
+    public diceBehavior dice;
+
     void Start()
     {
-        int totalHP = RollSidedDie(level);
-        finalHP(totalHP);
+        int totalHP = RollDie(level);
+        FinalHP(totalHP);
     }
 
-    public int RollSidedDie(int level)
+    public int RollDie(int level)
     {
-        int loopNum;
+        // Function that rolls die based on how many levels
+        // loopNum counts how many times the loop runs
+        // This loop stops when the players level is equal to loopNum
+        // This loop adds 1 to loopNum after each run
+        // This loop starts at 0
+        // Class die type
+        // Roll die Averaged
+        // Roll die Rolled
+
         int totalHP = 0;
 
-        for (loopNum=0; loopNum<level; loopNum++)
+        if (dice == diceBehavior.Averaged)
         {
-
-            // Function that rolls die based on how many levels
-            // loopNum counts how many times the loop runs
-            // This loop stops when the players level is equal to loopNum
-            // This loop adds 1 to loopNum after each run
-            // This loop starts at 0
-            // Class die type
-            // Roll die Averaged
-            // Roll die Rolled
-            if (dice == diceBehavior.Random)
+             // Roll die Averaged (1+N)/2 gives average die value
+             // having totalHP as an int will truncate odd numbers divided by 2 (round down)
+            totalHP = level * ((selectedClass[playerClass]) + 1) / 2;
+            // Debug.Log(selectedClass[playerClass] + " " + totalHP);
+        }
+        else
+        {
+            // Role die Random
+            int loopNum;
+            for (loopNum=0; loopNum<level; loopNum++)
             {
-                int roll = Random.Range(1,(selectedClass[playerClass])+1);
+                int roll = Random.Range(1,(selectedClass[playerClass]) + 1);
                 totalHP += roll;
-                Debug.Log(totalHP);
+                // Debug.Log(selectedClass[playerClass] + " " + roll + " " + totalHP);
             }
-            // This goes below the if dice random function
-            //Roll die Averaged
-            else
-            {
-                totalHP += ((selectedClass[playerClass])+1)/2;
-                Debug.Log(totalHP);
-            }
-
-            
         }
         return totalHP;
     }
 
-    // This function will print the final HP with everything added up
-    // This function is named finalHP
-
-    public void finalHP(int totalHP)
+    public void FinalHP(int totalHP)
     {
+        // This function will print the final HP with everything added up
+        // This function is named FinalHP
+
         totalHP = ((con/2)-5)*level + totalHP + (selectedRace[race])*level + (selectedTrait[trait])*level;
+        
+        if (totalHP < 1) totalHP = 1; // sets HP to 1 if low con results in HP less than 1.
         
         Debug.Log($"Welcome {characterName}! Your starting HP is : {totalHP}");
         return;
     }
-    
+
+    public void ErrorCheck()
+    {
+        
+
+    }
 }
